@@ -6,13 +6,12 @@ from prettytable import PrettyTable
 from utils import parse_arguments
 
 
-# constants variables
 API_BASE_URL = 'https://events.oregonstate.edu/api/2/'
-EVENTS_URL = API_BASE_URL + 'events'
-DEPARTMENTS_URL = API_BASE_URL + 'departments'
+EVENTS_URL = API_BASE_URL + 'events/'
+DEPARTMENTS_URL = API_BASE_URL + 'departments/'
 
 
-def send_request(url, params):
+def send_request(url, params=None):
     res = requests.get(url, params=params)
     if res.status_code != 200:
         sys.exit('HTTP status code: {}'.format(res.status_code))
@@ -38,23 +37,26 @@ def get_events():
 
 
 def create_events_report(events):
-    total_events = len(events)
     events_by_department = defaultdict(int)
 
     for event in events:
         if 'departments' in event['event']:
             for department in event['event']['departments']:
-                events_by_department[department['name']] += 1
+                events_by_department[str(department['id'])] += len(event['event']['event_instances'])
         else:
-            events_by_department['Uncatagorized'] += 1
+            events_by_department['N/A'] += len(event['event']['event_instances'])
 
-    department_table = PrettyTable(['Deparment', '# of Events'])
-    department_table.align = 'l'
     events_by_department = OrderedDict(sorted(events_by_department.items()))
 
-    for department, events in events_by_department.items():
-        department_table.add_row([department.replace('  ', ' '), events])
-    department_table.add_row(['Total', total_events])
+    department_table = PrettyTable(['ID', 'Name', '# of Events'])
+    department_table.align = 'l'
+
+    for department_id, events in events_by_department.items():
+        if department_id == 'N/A':
+            department_name = 'Uncatagorized'
+        else:
+            department_name = send_request(DEPARTMENTS_URL + department_id)['department']['name']
+        department_table.add_row([department_id, department_name, events])
     print(department_table)
 
 
