@@ -1,22 +1,12 @@
 import json
-import requests
-import sys
 from collections import defaultdict, OrderedDict
 from prettytable import PrettyTable
-from utils import parse_arguments
+from utils import parse_arguments, send_request
 
 
 API_BASE_URL = 'https://events.oregonstate.edu/api/2/'
 EVENTS_URL = API_BASE_URL + 'events/'
 DEPARTMENTS_URL = API_BASE_URL + 'departments/'
-
-
-def send_request(url, params=None):
-    res = requests.get(url, params=params)
-    if res.status_code != 200:
-        sys.exit('HTTP status code: {}'.format(res.status_code))
-    else:
-        return res.json()
 
 
 def get_events():
@@ -40,11 +30,12 @@ def create_events_report(events):
     events_by_department = defaultdict(int)
 
     for event in events:
+        event_instances = len(event['event']['event_instances'])
         if 'departments' in event['event']:
             for department in event['event']['departments']:
-                events_by_department[str(department['id'])] += len(event['event']['event_instances'])
+                events_by_department[str(department['id'])] += event_instances
         else:
-            events_by_department['N/A'] += len(event['event']['event_instances'])
+            events_by_department['N/A'] += event_instances
 
     events_by_department = OrderedDict(sorted(events_by_department.items()))
 
@@ -57,7 +48,9 @@ def create_events_report(events):
         else:
             department_name = send_request(DEPARTMENTS_URL + department_id)['department']['name']
         department_table.add_row([department_id, department_name, events])
+
     print(department_table)
+    print('Number of Events Submitted by Departments since {}'.format(args.start))
 
 
 def main():
