@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict, OrderedDict
 from prettytable import PrettyTable
 from utils import parse_arguments, send_request
@@ -10,12 +11,7 @@ DEPARTMENTS_URL = API_BASE_URL + 'departments/'
 
 
 def get_events():
-    params = {
-        'start': args.start,
-        'days': args.days,
-        'pp': 100,
-        'page': 1
-    }
+    params = {'start': start, 'days': days, 'pp': 100, 'page': 1}
     res = send_request(EVENTS_URL, params)
     events = res['events']
     while res['page']['current'] < res['page']['total']:
@@ -54,24 +50,23 @@ def create_table_by(field):
     for field_id, info in event_dict.items():
         table.add_row([field_id, info['name'], info['count']])
 
-    print('{0} number of events by [{1}] since {2} {0}'.format(
-        '*' * 5,
-        field,
-        args.start)
-    )
+    print('{0} number of events by [{1}] since {2} {0}'.format('*' * 5, field, start))
     print('{}\n'.format(table))
 
 
 def main():
-    global events
+    global events, days, start
+
+    args = parse_arguments()
+    days = os.environ['DAYS'] if 'DAYS' in os.environ else args.days
+    start = os.environ['START'] if 'START' in os.environ else args.start
 
     events = get_events()
-    # create table for each event filter
+
+    create_table_by('departments')
     for event_filter in send_request(EVENT_FILTERS_URL).keys():
         create_table_by(event_filter)
-    create_table_by('departments')
 
 
 if __name__ == '__main__':
-    args = parse_arguments()
     main()
