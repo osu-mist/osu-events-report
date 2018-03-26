@@ -5,6 +5,7 @@ from utils import parse_arguments, send_request
 
 API_BASE_URL = 'https://events.oregonstate.edu/api/2/'
 EVENTS_URL = API_BASE_URL + 'events/'
+EVENT_FILTERS_URL = EVENTS_URL + 'filters/'
 DEPARTMENTS_URL = API_BASE_URL + 'departments/'
 
 
@@ -22,6 +23,7 @@ def get_events():
         res = send_request(EVENTS_URL, params)
         events += res['events']
 
+    # adjust response so that we can reuse the logic of create_table_by easily
     for event in events:
         for filter_name, filter_info in event['event']['filters'].items():
             event['event'][filter_name] = filter_info
@@ -29,7 +31,9 @@ def get_events():
     return events
 
 
-def create_table_by(events, field):
+def create_table_by(field):
+    global events
+
     event_dict = defaultdict(lambda: {'name': 'Uncatagorized', 'count': 0})
 
     for event in events:
@@ -50,7 +54,7 @@ def create_table_by(events, field):
     for field_id, info in event_dict.items():
         table.add_row([field_id, info['name'], info['count']])
 
-    print('{0} Number of Events Submitted by {1} since {2} {0}'.format(
+    print('{0} number of events by [{1}] since {2} {0}'.format(
         '*' * 5,
         field,
         args.start)
@@ -59,12 +63,13 @@ def create_table_by(events, field):
 
 
 def main():
+    global events
+
     events = get_events()
-    create_table_by(events, 'event_audience')
-    create_table_by(events, 'event_county')
-    create_table_by(events, 'event_event_topic')
-    create_table_by(events, 'event_types')
-    create_table_by(events, 'departments')
+    # create table for each event filter
+    for event_filter in send_request(EVENT_FILTERS_URL).keys():
+        create_table_by(event_filter)
+    create_table_by('departments')
 
 
 if __name__ == '__main__':
