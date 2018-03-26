@@ -2,6 +2,7 @@ import json
 import requests
 import sys
 from collections import defaultdict, OrderedDict
+from prettytable import PrettyTable
 from utils import parse_arguments
 
 
@@ -46,11 +47,14 @@ def create_events_report(events):
         else:
             events_by_department['Uncatagorized'] += 1
 
+    department_table = PrettyTable(['Deparment', '# of Events'])
+    department_table.align = 'l'
     events_by_department = OrderedDict(sorted(events_by_department.items()))
 
     for department, events in events_by_department.items():
-        print('{}: {}'.format(department, events))
-    print('Total: {}'.format(total_events))
+        department_table.add_row([department.replace('  ', ' '), events])
+    department_table.add_row(['Total', total_events])
+    print(department_table)
 
 
 def main():
