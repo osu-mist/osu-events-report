@@ -43,7 +43,8 @@ def create_events_report(events):
 
     for event in events:
         if 'departments' in event['event']:
-            events_by_department[event['event']['departments'][0]['name']] += 1
+            for department in event['event']['departments']:
+                events_by_department[department['name']] += 1
         else:
             events_by_department['Uncatagorized'] += 1
 
