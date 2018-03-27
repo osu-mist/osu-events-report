@@ -14,7 +14,7 @@ A report generator (Python 3) of OSU events based on [Localist API](https://deve
 
     ```
     $ python --help
-    $ python osu-events-report.py --days=30 --start='2018-01-31'
+    $ python osu-events-report.py --start='2018-01-31 --days=2018-04-30'
     ```
 
 3. Or export as `report.txt`:
@@ -34,5 +34,5 @@ A report generator (Python 3) of OSU events based on [Localist API](https://deve
 2. Pass arguments as environment variables to the container:
 
     ```
-    $ docker run --rm -e START='2018-01-31' -e DAYS='365' osu-events-report
+    $ docker run --rm -e START='2018-01-31' -e END='2018-04-30' osu-events-report
     ```

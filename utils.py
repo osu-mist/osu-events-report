@@ -5,20 +5,21 @@ from datetime import datetime, timedelta
 
 
 def parse_arguments():
-    last_year_today = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
+    today = datetime.now()
+    last_year_today = (today - timedelta(days=365))
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--days',
-        dest='days',
-        default=365,
-        help='return events within this many days after start (default: 365)'
-    )
-    parser.add_argument(
         '--start',
         dest='start',
-        default=last_year_today,
+        default=last_year_today.strftime('%Y-%m-%d'),
         help='start of range (default: {})'.format(last_year_today))
+    parser.add_argument(
+        '--end',
+        dest='end',
+        default=today.strftime('%Y-%m-%d'),
+        help='end of range (default: {})'.format(last_year_today)
+    )
 
     args = parser.parse_args()
     return args
