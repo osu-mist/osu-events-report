@@ -11,7 +11,7 @@ DEPARTMENTS_URL = API_BASE_URL + 'departments/'
 
 
 def get_events():
-    params = {'start': start, 'days': days, 'pp': 100, 'page': 1}
+    params = {'start': start, 'end': end, 'pp': 100, 'page': 1}
     res = send_request(EVENTS_URL, params)
     events = res['events']
     while res['page']['current'] < res['page']['total']:
@@ -50,16 +50,17 @@ def create_table_by(field):
     for field_id, info in event_dict.items():
         table.add_row([field_id, info['name'], info['count']])
 
-    print('{0} number of events by [{1}] since {2} {0}'.format('*' * 5, field, start))
+    print('{0} number of events by [{1}] from {2} to {3} {0}'.format(
+        '*' * 4, field, start, end))
     print('{}\n'.format(table))
 
 
 def main():
-    global events, days, start
+    global events, end, start
 
     args = parse_arguments()
-    days = os.environ['DAYS'] if 'DAYS' in os.environ else args.days
     start = os.environ['START'] if 'START' in os.environ else args.start
+    end = os.environ['END'] if 'END' in os.environ else args.end
 
     events = get_events()
 
