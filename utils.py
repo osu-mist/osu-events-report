@@ -18,7 +18,7 @@ def parse_arguments():
         '--end',
         dest='end',
         default=today.strftime('%Y-%m-%d'),
-        help='end of range (default: {})'.format(last_year_today)
+        help='end of range (default: {})'.format(today)
     )
 
     args = parser.parse_args()
