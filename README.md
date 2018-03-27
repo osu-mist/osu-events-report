@@ -14,7 +14,7 @@ A report generator (Python 3) of OSU events based on [Localist API](https://deve
 
     ```
     $ python --help
-    $ python osu-events-report.py --start='2018-01-31 --days=2018-04-30'
+    $ python osu-events-report.py --start='2018-01-31 --end=2018-04-30'
     ```
 
 3. Or export as `report.txt`:
