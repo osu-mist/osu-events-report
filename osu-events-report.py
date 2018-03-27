@@ -50,7 +50,8 @@ def create_table_by(field):
     for field_id, info in event_dict.items():
         table.add_row([field_id, info['name'], info['count']])
 
-    print('{0} number of events by [{1}] since {2} {0}'.format('*' * 5, field, start))
+    print('{0} number of events by [{1}] from {2} to {3} {0}'.format(
+        '*' * 4, field, start, end))
     print('{}\n'.format(table))
 
 
