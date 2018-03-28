@@ -14,7 +14,7 @@ A OSU events report generator (Python 3) based on [Localist API](https://develop
 
     ```
     $ python --help
-    $ python osu-events-report.py -o csv -s '2018-01-31 -e 2018-04-30'
+    $ python osu-events-report.py -o csv -s '2018-01-31' -e '2018-04-30'
     ```
 
 ## Docker
