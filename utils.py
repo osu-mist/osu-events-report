@@ -1,6 +1,6 @@
 import requests
 import sys
-from argparse import ArgumentParser, RawTextHelpFormatter
+from argparse import ArgumentParser
 from datetime import datetime, timedelta
 
 
@@ -8,7 +8,7 @@ def parse_arguments():
     today = datetime.now().strftime('%Y-%m-%d')
     last_year_today = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
 
-    parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
+    parser = ArgumentParser()
     parser.add_argument(
         '-o',
         dest='output',
