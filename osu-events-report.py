@@ -70,13 +70,10 @@ def create_report_by(fields):
     else:
         table = PrettyTable(titles)
         table.align = 'l'
-
         for event_dict in event_dicts:
             for field_id, info in event_dict.items():
                 table.add_row([field_id, info['name'], info['count'], info['type']])
-
         content = table.get_html_string() if output == 'html' else table.get_string()
-
         with open('{}.{}'.format(file_name, output), 'w') as f:
             f.write(content)
 
