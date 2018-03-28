@@ -10,7 +10,7 @@ A OSU events report generator (Python 3) based on [Localist API](https://develop
     $ pip install -r requirements.txt
     ```
 
-2. Generate report to terminal:
+2. Generate report as chosen format:
 
     ```
     $ python --help
