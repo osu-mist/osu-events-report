@@ -32,5 +32,6 @@ A OSU events report generator (Python 3) based on [Localist API](https://develop
                  -e OUTPUT='csv' \
                  -e START='2018-01-31' \
                  -e END='2018-04-30' \
-                 -v "$(pwd)"/:/usr/src/app/ \ osu-events-report
+                 -v "$(pwd)"/:/usr/src/app/ \
+                 osu-events-report
     ```
