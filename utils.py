@@ -5,19 +5,25 @@ from datetime import datetime, timedelta
 
 
 def parse_arguments():
-    today = datetime.now()
-    last_year_today = (today - timedelta(days=365))
+    today = datetime.now().strftime('%Y-%m-%d')
+    last_year_today = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        '-c',
+        metavar='<file name>',
+        help='export as a csv file')
+    parser.add_argument(
         '--start',
         dest='start',
-        default=last_year_today.strftime('%Y-%m-%d'),
+        metavar='<start date>',
+        default=last_year_today,
         help='start of range (default: {})'.format(last_year_today))
     parser.add_argument(
         '--end',
         dest='end',
-        default=today.strftime('%Y-%m-%d'),
+        metavar='<end date>',
+        default=today,
         help='end of range (default: {})'.format(today)
     )
 
