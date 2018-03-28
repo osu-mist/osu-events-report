@@ -31,6 +31,7 @@ def get_events():
 def create_report_by(fields):
     global events
 
+    file_name = 'osu-events-from-{}-to-{}'.format(start, end)
     titles = ['Field ID', 'Field Name', '# of Events', 'Field Type']
     table = PrettyTable(titles)
     table.align = 'l'
@@ -53,19 +54,20 @@ def create_report_by(fields):
         for field_id, info in event_dict.items():
             table.add_row([field_id, info['name'], info['count'], field])
 
-    if csv_file:
+    if output == 'csv':
         csv_file_name = 'osu-events-from-{}-to-{}.csv'.format(start, end)
         print(csv_file_name)
     else:
-        print(table.get_string())
-        print('{0} OSU events from {1} to {2} {0}'.format('*' * 4, start, end))
+        table_content = table.get_html_string() if output == 'html' else table.get_string()
+        with open('{}.{}'.format(file_name, output), 'w+') as f:
+            f.write(table_content)
 
 
 def main():
-    global csv_file, events, end, start
+    global output, events, end, start
 
     args = parse_arguments()
-    csv_file = os.environ['CSV'] if 'CSV' in os.environ else args.csv
+    output = os.environ['OUTPUT'] if 'OUTPUT' in os.environ else args.output
     start = os.environ['START'] if 'START' in os.environ else args.start
     end = os.environ['END'] if 'END' in os.environ else args.end
 

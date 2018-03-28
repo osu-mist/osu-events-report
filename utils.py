@@ -1,6 +1,6 @@
-import argparse
 import requests
 import sys
+from argparse import ArgumentParser, RawTextHelpFormatter
 from datetime import datetime, timedelta
 
 
@@ -8,21 +8,21 @@ def parse_arguments():
     today = datetime.now().strftime('%Y-%m-%d')
     last_year_today = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
 
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
     parser.add_argument(
-        '-c',
-        '--csv',
-        dest='csv',
-        action='store_true',
-        help='export as a csv file')
+        '-o',
+        dest='output',
+        choices=['txt', 'csv', 'html'],
+        default='txt',
+        help='output format (default: txt)')
     parser.add_argument(
-        '--start',
+        '-s',
         dest='start',
         metavar='<start date>',
         default=last_year_today,
         help='start of range (default: {})'.format(last_year_today))
     parser.add_argument(
-        '--end',
+        '-e',
         dest='end',
         metavar='<end date>',
         default=today,
