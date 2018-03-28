@@ -11,7 +11,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-c',
-        metavar='<file name>',
+        '--csv',
+        dest='csv',
+        action='store_true',
         help='export as a csv file')
     parser.add_argument(
         '--start',
