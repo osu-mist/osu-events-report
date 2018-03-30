@@ -29,10 +29,9 @@ def get_events():
 
 
 def create_report_by(fields):
-    global events
+    global events, file_name
 
     event_dicts = []
-    file_name = 'osu-events-from-{}-to-{}'.format(start, end)
     titles = ['Field ID', 'Field Name', '# of Events', 'Field Type']
 
     # orgnaize event details
@@ -80,7 +79,7 @@ def create_report_by(fields):
 
 
 def main():
-    global output, events, end, start
+    global output, events, end, file_name, start
 
     args = parse_arguments()
     output = os.environ['OUTPUT'] if 'OUTPUT' in os.environ else args.output
@@ -90,6 +89,7 @@ def main():
     end = os.environ['END'] if 'END' in os.environ else args.end
     final_end_date = end_date = datetime.strptime(end, '%Y-%m-%d')
     days = (end_date - start_date).days
+    file_name = 'osu-events-from-{}-to-{}'.format(start, end)
 
     events = []
     while days > 365:
@@ -107,9 +107,9 @@ def main():
 
     events += get_events()
 
-    fileds = [event_filter for event_filter in send_request(EVENT_FILTERS_URL).keys()]
-    fileds.append('departments')
-    create_report_by(fileds)
+    fields = [event_filter for event_filter in send_request(EVENT_FILTERS_URL).keys()]
+    fields.append('departments')
+    create_report_by(fields)
 
 
 if __name__ == '__main__':
