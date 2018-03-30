@@ -1,5 +1,6 @@
 import requests
 import sys
+import urllib
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 
@@ -36,6 +37,7 @@ def parse_arguments():
 def send_request(url, params=None):
     res = requests.get(url, params=params)
     if res.status_code != 200:
-        sys.exit('HTTP status code: {}'.format(res.status_code))
+        url = url + '?' + urllib.parse.urlencode(params)
+        sys.exit('HTTP status code {}: {}'.format(res.status_code, url))
     else:
         return res.json()

@@ -1,13 +1,14 @@
 import csv
 import os
 from collections import defaultdict, OrderedDict
+from datetime import datetime, timedelta
 from prettytable import PrettyTable
 from utils import parse_arguments, send_request
 
 
-API_BASE_URL = 'https://events.oregonstate.edu/api/2/'
-EVENTS_URL = API_BASE_URL + 'events/'
-EVENT_FILTERS_URL = EVENTS_URL + 'filters/'
+API_BASE_URL = 'https://events.oregonstate.edu/api/2'
+EVENTS_URL = API_BASE_URL + '/events'
+EVENT_FILTERS_URL = EVENTS_URL + '/filters'
 
 
 def get_events():
@@ -83,10 +84,28 @@ def main():
 
     args = parse_arguments()
     output = os.environ['OUTPUT'] if 'OUTPUT' in os.environ else args.output
-    start = os.environ['START'] if 'START' in os.environ else args.start
-    end = os.environ['END'] if 'END' in os.environ else args.end
 
-    events = get_events()
+    start = os.environ['START'] if 'START' in os.environ else args.start
+    start_date = datetime.strptime(start, '%Y-%m-%d')
+    end = os.environ['END'] if 'END' in os.environ else args.end
+    final_end_date = end_date = datetime.strptime(end, '%Y-%m-%d')
+    days = (end_date - start_date).days
+
+    events = []
+    while days > 365:
+        end_date = start_date + timedelta(days=365)
+        end = end_date.strftime('%Y-%m-%d')
+
+        events += get_events()
+
+        start_date = datetime.strptime(end, '%Y-%m-%d') + timedelta(days=1)
+        start = start_date.strftime('%Y-%m-%d')
+        end_date = final_end_date
+        end = end_date.strftime('%Y-%m-%d')
+
+        days = (end_date - start_date).days
+
+    events += get_events()
 
     fileds = [event_filter for event_filter in send_request(EVENT_FILTERS_URL).keys()]
     fileds.append('departments')
