@@ -1,23 +1,33 @@
-import argparse
+import logging
 import requests
 import sys
+import urllib
+from argparse import ArgumentParser
 from datetime import datetime, timedelta
 
 
 def parse_arguments():
-    today = datetime.now()
-    last_year_today = (today - timedelta(days=365))
+    today = datetime.now().strftime('%Y-%m-%d')
+    last_year_today = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
 
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument(
-        '--start',
+        '-o',
+        dest='output',
+        choices=['txt', 'csv', 'html'],
+        default='txt',
+        help='output format (default: txt)')
+    parser.add_argument(
+        '-s',
         dest='start',
-        default=last_year_today.strftime('%Y-%m-%d'),
+        metavar='<start date>',
+        default=last_year_today,
         help='start of range (default: {})'.format(last_year_today))
     parser.add_argument(
-        '--end',
+        '-e',
         dest='end',
-        default=today.strftime('%Y-%m-%d'),
+        metavar='<end date>',
+        default=today,
         help='end of range (default: {})'.format(today)
     )
 
@@ -26,8 +36,10 @@ def parse_arguments():
 
 
 def send_request(url, params=None):
+    logging.basicConfig(level=logging.DEBUG)
     res = requests.get(url, params=params)
     if res.status_code != 200:
-        sys.exit('HTTP status code: {}'.format(res.status_code))
+        url = url + '?' + urllib.parse.urlencode(params)
+        sys.exit('HTTP status code {}: {}'.format(res.status_code, url))
     else:
         return res.json()

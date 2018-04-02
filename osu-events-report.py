@@ -1,16 +1,17 @@
+import csv
 import os
 from collections import defaultdict, OrderedDict
+from datetime import datetime, timedelta
 from prettytable import PrettyTable
 from utils import parse_arguments, send_request
 
 
-API_BASE_URL = 'https://events.oregonstate.edu/api/2/'
-EVENTS_URL = API_BASE_URL + 'events/'
-EVENT_FILTERS_URL = EVENTS_URL + 'filters/'
-DEPARTMENTS_URL = API_BASE_URL + 'departments/'
+API_BASE_URL = 'https://events.oregonstate.edu/api/2'
+EVENTS_URL = API_BASE_URL + '/events'
+EVENT_FILTERS_URL = EVENTS_URL + '/filters'
 
 
-def get_events():
+def get_events(start, end):
     params = {'start': start, 'end': end, 'pp': 100, 'page': 1}
     res = send_request(EVENTS_URL, params)
     events = res['events']
@@ -27,46 +28,88 @@ def get_events():
     return events
 
 
-def create_table_by(field):
-    global events
+def create_report_by(fields):
+    global events, file_name
 
-    event_dict = defaultdict(lambda: {'name': 'Uncatagorized', 'count': 0})
+    event_dicts = []
+    titles = ['Field ID', 'Field Name', '# of Events', 'Field Type']
 
-    for event in events:
-        event_instances = len(event['event']['event_instances'])
+    # orgnaize event details
+    for field in fields:
+        event_dict = defaultdict(lambda: {
+            'name': 'Uncatagorized',
+            'count': 0,
+            'type': field
+        })
 
-        if field in event['event']:
-            for item in event['event'][field]:
-                event_dict[str(item['id'])]['name'] = item['name']
-                event_dict[str(item['id'])]['count'] += event_instances
-        else:
-            event_dict['N/A']['count'] += event_instances
+        for event in events:
+            event_instances = len(event['event']['event_instances'])
 
-    event_dict = OrderedDict(sorted(event_dict.items()))
+            if field in event['event']:
+                for item in event['event'][field]:
+                    event_dict[str(item['id'])]['name'] = item['name']
+                    event_dict[str(item['id'])]['count'] += event_instances
+            else:
+                event_dict['N/A']['count'] += event_instances
 
-    table = PrettyTable(['ID', '{}'.format(field), '# of Events'])
-    table.align = 'l'
+        event_dicts.append(OrderedDict(sorted(event_dict.items())))
 
-    for field_id, info in event_dict.items():
-        table.add_row([field_id, info['name'], info['count']])
-
-    print('{0} number of events by [{1}] from {2} to {3} {0}'.format(
-        '*' * 4, field, start, end))
-    print('{}\n'.format(table))
+    # generate output file
+    if output == 'csv':
+        with open('{}.{}'.format(file_name, output), 'w') as f:
+            csv_write = csv.DictWriter(f, fieldnames=titles)
+            csv_write.writeheader()
+            for event_dict in event_dicts:
+                for field_id, info in event_dict.items():
+                    csv_write.writerow({
+                        'Field ID': field_id,
+                        'Field Name': info['name'],
+                        '# of Events': info['count'],
+                        'Field Type': info['type']
+                    })
+    else:
+        table = PrettyTable(titles)
+        table.align = 'l'
+        for event_dict in event_dicts:
+            for field_id, info in event_dict.items():
+                table.add_row([field_id, info['name'], info['count'], info['type']])
+        content = table.get_html_string() if output == 'html' else table.get_string()
+        with open('{}.{}'.format(file_name, output), 'w') as f:
+            f.write(content)
 
 
 def main():
-    global events, end, start
+    global output, events, file_name
 
     args = parse_arguments()
+    output = os.environ['OUTPUT'] if 'OUTPUT' in os.environ else args.output
+
     start = os.environ['START'] if 'START' in os.environ else args.start
+    start_date = datetime.strptime(start, '%Y-%m-%d')
     end = os.environ['END'] if 'END' in os.environ else args.end
+    final_end_date = end_date = datetime.strptime(end, '%Y-%m-%d')
+    days = (end_date - start_date).days
+    file_name = 'osu-events-from-{}-to-{}'.format(start, end)
 
-    events = get_events()
+    events = []
+    while days > 365:
+        end_date = start_date + timedelta(days=365)
+        end = end_date.strftime('%Y-%m-%d')
 
-    create_table_by('departments')
-    for event_filter in send_request(EVENT_FILTERS_URL).keys():
-        create_table_by(event_filter)
+        events += get_events(start, end)
+
+        start_date = datetime.strptime(end, '%Y-%m-%d') + timedelta(days=1)
+        start = start_date.strftime('%Y-%m-%d')
+        end_date = final_end_date
+        end = end_date.strftime('%Y-%m-%d')
+
+        days = (end_date - start_date).days
+
+    events += get_events(start, end)
+
+    fields = [event_filter for event_filter in send_request(EVENT_FILTERS_URL).keys()]
+    fields.append('departments')
+    create_report_by(fields)
 
 
 if __name__ == '__main__':
