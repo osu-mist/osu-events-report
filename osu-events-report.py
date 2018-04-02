@@ -11,7 +11,7 @@ EVENTS_URL = API_BASE_URL + '/events'
 EVENT_FILTERS_URL = EVENTS_URL + '/filters'
 
 
-def get_events():
+def get_events(start, end):
     params = {'start': start, 'end': end, 'pp': 100, 'page': 1}
     res = send_request(EVENTS_URL, params)
     events = res['events']
@@ -79,7 +79,7 @@ def create_report_by(fields):
 
 
 def main():
-    global output, events, end, file_name, start
+    global output, events, file_name
 
     args = parse_arguments()
     output = os.environ['OUTPUT'] if 'OUTPUT' in os.environ else args.output
@@ -96,7 +96,7 @@ def main():
         end_date = start_date + timedelta(days=365)
         end = end_date.strftime('%Y-%m-%d')
 
-        events += get_events()
+        events += get_events(start, end)
 
         start_date = datetime.strptime(end, '%Y-%m-%d') + timedelta(days=1)
         start = start_date.strftime('%Y-%m-%d')
@@ -105,7 +105,7 @@ def main():
 
         days = (end_date - start_date).days
 
-    events += get_events()
+    events += get_events(start, end)
 
     fields = [event_filter for event_filter in send_request(EVENT_FILTERS_URL).keys()]
     fields.append('departments')

@@ -1,3 +1,4 @@
+import logging
 import requests
 import sys
 import urllib
@@ -35,6 +36,7 @@ def parse_arguments():
 
 
 def send_request(url, params=None):
+    logging.basicConfig(level=logging.DEBUG)
     res = requests.get(url, params=params)
     if res.status_code != 200:
         url = url + '?' + urllib.parse.urlencode(params)
